@@ -1,0 +1,48 @@
+{
+  "name": "@astrazstudio/pushnotify-sdk",
+  "version": "1.0.0",
+  "description": "Official TypeScript SDK for PushNotify — real-time notification infrastructure by Astraz Studio.",
+  "author": "Astraz Studio",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "notifications",
+    "websocket",
+    "web-push",
+    "real-time",
+    "sdk",
+    "pushnotify"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {
+    "tsup": "^8.0.0",
+    "typescript": "^5.4.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vitaseptem/PUSHNOTIFY.git",
+    "directory": "sdk"
+  }
+}
