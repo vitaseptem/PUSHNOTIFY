@@ -1,0 +1,8 @@
+DROP TABLE IF EXISTS webhook_logs;
+DROP TABLE IF EXISTS webhooks;
+DROP TABLE IF EXISTS deliveries;
+DROP TABLE IF EXISTS notifications;
+DROP TABLE IF EXISTS subscribers;
+DROP TABLE IF EXISTS api_keys;
+DROP TABLE IF EXISTS workspaces;
+DROP TABLE IF EXISTS users;

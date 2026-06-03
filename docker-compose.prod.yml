@@ -1,0 +1,33 @@
+# Production overrides: apply with
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+services:
+  postgres:
+    ports: []
+    restart: always
+
+  redis:
+    ports: []
+    restart: always
+
+  server:
+    restart: always
+    ports: []
+    environment:
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required in production}
+
+  worker:
+    restart: always
+    deploy:
+      replicas: 3
+
+  dashboard:
+    restart: always
+    ports: []
+    environment:
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:?set your public API URL}
+
+  nginx:
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"

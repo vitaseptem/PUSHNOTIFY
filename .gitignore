@@ -1,0 +1,24 @@
+# Env
+.env
+.env.local
+*.local
+
+# Go
+server/bin/
+*.test
+*.out
+
+# Node
+node_modules/
+dashboard/.next/
+dashboard/out/
+sdk/dist/
+npm-debug.log*
+yarn-error.log*
+*.tsbuildinfo
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/
+*.swp
