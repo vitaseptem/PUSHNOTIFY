@@ -1,17 +1,23 @@
 package middleware
 
 import (
+	"context"
 	"net/http"
 	"strings"
 
-	"github.com/astrazstudio/pushnotify/server/internal/store"
 	"github.com/astrazstudio/pushnotify/server/pkg/crypto"
 )
+
+// APIKeyResolver resolves an API key hash to a workspace id. *store.Store and
+// any test fake implement it.
+type APIKeyResolver interface {
+	ResolveAPIKey(ctx context.Context, keyHash string) (string, error)
+}
 
 // APIKeyOrJWT authenticates a request via either an X-API-Key header (resolving
 // the workspace) or, failing that, a Bearer JWT. This lets server-to-server
 // integrations use API keys while the dashboard uses JWTs.
-func APIKeyOrJWT(st *store.Store, jwtSecret string) func(http.Handler) http.Handler {
+func APIKeyOrJWT(st APIKeyResolver, jwtSecret string) func(http.Handler) http.Handler {
 	jwtMW := JWTAuth(jwtSecret)
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

@@ -17,7 +17,7 @@ import (
 // Handlers bundles every dependency the HTTP layer needs.
 type Handlers struct {
 	Cfg         *config.Config
-	Store       *store.Store
+	Store       DataStore
 	Redis       *redis.Client
 	Hub         *hub.Hub
 	Notifier    *services.NotificationService

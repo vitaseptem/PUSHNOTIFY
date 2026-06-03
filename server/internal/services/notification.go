@@ -38,7 +38,7 @@ type jobPayload struct {
 // NotificationService orchestrates send requests into queued deliveries and
 // processes those deliveries through channels when run as a worker.
 type NotificationService struct {
-	store    *store.Store
+	store    Datastore
 	producer queue.Producer
 	tmpl     *TemplateService
 	webhooks *WebhookService
@@ -48,7 +48,7 @@ type NotificationService struct {
 
 // NewNotificationService wires the orchestrator.
 func NewNotificationService(
-	st *store.Store,
+	st Datastore,
 	producer queue.Producer,
 	tmpl *TemplateService,
 	webhooks *WebhookService,

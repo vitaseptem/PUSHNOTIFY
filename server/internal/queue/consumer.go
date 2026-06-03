@@ -26,6 +26,7 @@ type RedisConsumer struct {
 
 	wg     sync.WaitGroup
 	cancel context.CancelFunc
+	stopCh chan struct{}
 }
 
 // NewConsumer builds a RedisConsumer.
@@ -56,6 +57,7 @@ func (c *RedisConsumer) SetHandler(channel string, handler ChannelHandler) {
 func (c *RedisConsumer) Start(ctx context.Context) {
 	ctx, cancel := context.WithCancel(ctx)
 	c.cancel = cancel
+	c.stopCh = make(chan struct{})
 
 	c.wg.Add(1)
 	go c.scheduleLoop(ctx)
@@ -67,12 +69,18 @@ func (c *RedisConsumer) Start(ctx context.Context) {
 	c.log.Info("queue consumer started", zap.Int("workers", c.workers))
 }
 
-// Stop signals all goroutines to finish in-flight work and waits for them.
+// Stop performs a graceful shutdown: it signals the workers to stop accepting
+// new blocking reads, drains any jobs already enqueued in the priority queues,
+// finishes in-flight work, and only then returns. Jobs scheduled for a future
+// retry remain safely in Redis and are picked up on the next start.
 func (c *RedisConsumer) Stop() {
+	if c.stopCh != nil {
+		close(c.stopCh)
+	}
+	c.wg.Wait()
 	if c.cancel != nil {
 		c.cancel()
 	}
-	c.wg.Wait()
 	c.log.Info("queue consumer stopped")
 }
 
@@ -81,14 +89,18 @@ func (c *RedisConsumer) workerLoop(ctx context.Context, id int) {
 	queues := []string{KeyQueueHigh, KeyQueueDefault, KeyQueueLow}
 	for {
 		select {
+		case <-c.stopCh:
+			// Drain whatever is left in the queues, then exit.
+			c.drainRemaining(ctx)
+			return
 		case <-ctx.Done():
 			return
 		default:
 		}
 
 		// BRPOP blocks across all queues in priority order with a short
-		// timeout so we can observe context cancellation promptly.
-		res, err := c.rdb.BRPop(ctx, 2*time.Second, queues...).Result()
+		// timeout so we can observe shutdown promptly.
+		res, err := c.rdb.BRPop(ctx, time.Second, queues...).Result()
 		if err != nil {
 			if err == redis.Nil || ctx.Err() != nil {
 				continue
@@ -99,6 +111,27 @@ func (c *RedisConsumer) workerLoop(ctx context.Context, id int) {
 		}
 		// res[0] is the queue key, res[1] is the payload.
 		c.process(ctx, res[1])
+	}
+}
+
+// drainRemaining processes every job currently sitting in the priority queues
+// without blocking, so an in-flight shutdown does not abandon ready work.
+func (c *RedisConsumer) drainRemaining(ctx context.Context) {
+	queues := []string{KeyQueueHigh, KeyQueueDefault, KeyQueueLow}
+	for {
+		popped := false
+		for _, q := range queues {
+			raw, err := c.rdb.RPop(ctx, q).Result()
+			if err != nil {
+				continue // empty queue or transient error
+			}
+			c.process(ctx, raw)
+			popped = true
+			break // restart from the highest-priority queue
+		}
+		if !popped {
+			return
+		}
 	}
 }
 
@@ -154,6 +187,8 @@ func (c *RedisConsumer) scheduleLoop(ctx context.Context) {
 	defer ticker.Stop()
 	for {
 		select {
+		case <-c.stopCh:
+			return
 		case <-ctx.Done():
 			return
 		case <-ticker.C:

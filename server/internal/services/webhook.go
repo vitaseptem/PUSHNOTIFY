@@ -11,7 +11,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/astrazstudio/pushnotify/server/internal/store"
 	"go.uber.org/zap"
 )
 
@@ -24,13 +23,13 @@ const (
 
 // WebhookService dispatches signed status webhooks to customer endpoints.
 type WebhookService struct {
-	store  *store.Store
+	store  Datastore
 	log    *zap.Logger
 	client *http.Client
 }
 
 // NewWebhookService constructs the service.
-func NewWebhookService(st *store.Store, log *zap.Logger) *WebhookService {
+func NewWebhookService(st Datastore, log *zap.Logger) *WebhookService {
 	return &WebhookService{
 		store:  st,
 		log:    log,

@@ -113,5 +113,8 @@ func (h *Handlers) RegenerateVAPID(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusInternalServerError, "update failed")
 		return
 	}
-	writeJSON(w, http.StatusOK, map[string]string{"vapid_public_key": pub})
+	writeJSON(w, http.StatusOK, map[string]string{
+		"vapid_public_key": pub,
+		"message":          "VAPID keys regenerated",
+	})
 }
