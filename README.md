@@ -16,6 +16,10 @@
   <img alt="Status" src="https://img.shields.io/badge/status-v1.0.0-22C55E" />
 </p>
 
+<p align="center">
+  <strong>🇺🇸 English</strong> · <a href="./README.pt-br.md">🇧🇷 Português</a>
+</p>
+
 ---
 
 ## What is it
@@ -173,4 +177,4 @@ make server      # build the Go binary
 
 ## License
 
-MIT · Built with ❤️ by **Astraz Studio** · 2026
+MIT — see [LICENSE](./LICENSE). Built with ❤️ by **Astraz Studio** · 2026
