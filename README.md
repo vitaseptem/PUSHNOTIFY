@@ -81,6 +81,11 @@ await client.send('user_123', {
 });
 ```
 
+## Documentation
+
+Full developer documentation (bilingual EN/PT) is served by the dashboard at
+**`/docs`** (e.g. `http://localhost:3000/docs`).
+
 ## API (REST)
 
 All endpoints are versioned under `/api/v1`. Auth is a JWT (`Authorization: Bearer`)

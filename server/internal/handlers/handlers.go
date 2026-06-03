@@ -24,6 +24,7 @@ type Handlers struct {
 	Subscribers *services.SubscriberService
 	Analytics   *services.AnalyticsService
 	Templates   *services.TemplateService
+	Billing     *services.BillingService
 	Log         *zap.Logger
 }
 

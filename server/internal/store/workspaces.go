@@ -25,14 +25,18 @@ func (s *Store) CreateWorkspace(ctx context.Context, ownerID, name, slug, vapidP
 }
 
 const workspaceCols = `id, owner_id, name, slug, plan, notifications_sent, notifications_limit,
-	COALESCE(vapid_public_key,''), COALESCE(vapid_private_key,''), created_at, updated_at`
+	COALESCE(vapid_public_key,''), COALESCE(vapid_private_key,''),
+	stripe_customer_id, stripe_subscription_id, COALESCE(plan_status,'active'), current_period_end,
+	created_at, updated_at`
 
 func scanWorkspace(row interface {
 	Scan(dest ...any) error
 }) (*models.Workspace, error) {
 	var w models.Workspace
 	err := row.Scan(&w.ID, &w.OwnerID, &w.Name, &w.Slug, &w.Plan, &w.NotificationsSent,
-		&w.NotificationsLimit, &w.VAPIDPublicKey, &w.VAPIDPrivateKey, &w.CreatedAt, &w.UpdatedAt)
+		&w.NotificationsLimit, &w.VAPIDPublicKey, &w.VAPIDPrivateKey,
+		&w.StripeCustomerID, &w.StripeSubscriptionID, &w.PlanStatus, &w.CurrentPeriodEnd,
+		&w.CreatedAt, &w.UpdatedAt)
 	if err != nil {
 		return nil, mapErr(err)
 	}

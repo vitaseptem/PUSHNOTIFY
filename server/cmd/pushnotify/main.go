@@ -104,6 +104,7 @@ func buildApp(cfg *config.Config, pool *pgxpool.Pool, rdb *redis.Client, log *za
 	notifier := services.NewNotificationService(st, producer, tmpl, webhookSvc, chans, log)
 	subscriberSvc := services.NewSubscriberService(st)
 	analyticsSvc := services.NewAnalyticsService(st, rdb, h, log)
+	billingSvc := services.NewBillingService(st, cfg.Billing, cfg.Server.AppURL, log)
 
 	hs := &handlers.Handlers{
 		Cfg:         cfg,
@@ -114,6 +115,7 @@ func buildApp(cfg *config.Config, pool *pgxpool.Pool, rdb *redis.Client, log *za
 		Subscribers: subscriberSvc,
 		Analytics:   analyticsSvc,
 		Templates:   tmpl,
+		Billing:     billingSvc,
 		Log:         log,
 	}
 

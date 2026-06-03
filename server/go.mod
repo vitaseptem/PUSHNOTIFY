@@ -11,6 +11,7 @@ require (
 	github.com/jackc/pgx/v5 v5.6.0
 	github.com/redis/go-redis/v9 v9.5.3
 	github.com/spf13/viper v1.18.2
+	github.com/stripe/stripe-go/v79 v79.12.0
 	go.uber.org/zap v1.27.0
 	golang.org/x/crypto v0.24.0
 )

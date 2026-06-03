@@ -156,13 +156,36 @@ function ApiKeysTab() {
 
 function PlanTab() {
   const [ws, setWs] = useState<Workspace | null>(null);
+  const [billingEnabled, setBillingEnabled] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
   useEffect(() => {
     api<Workspace>('/api/v1/workspace').then(setWs).catch(() => undefined);
+    api<{ enabled: boolean }>('/api/v1/billing/status')
+      .then((s) => setBillingEnabled(s.enabled))
+      .catch(() => undefined);
   }, []);
+
+  async function go(path: string) {
+    setBusy(true);
+    setError(null);
+    try {
+      const { url } = await api<{ url: string }>(path, { method: 'POST' });
+      window.location.href = url;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'billing error');
+      setBusy(false);
+    }
+  }
+
   if (!ws) return <Skeleton className="h-32" />;
   const pct = ws.notifications_limit > 0 ? (ws.notifications_sent / ws.notifications_limit) * 100 : 0;
+  const isPro = ws.plan === 'pro';
+
   return (
     <Card className="max-w-lg space-y-4">
+      {error && <ErrorState message={error} />}
       <div className="flex items-center justify-between">
         <p className="font-medium capitalize">{ws.plan} plan</p>
         <Badge color="primary">{ws.plan}</Badge>
@@ -178,6 +201,20 @@ function PlanTab() {
           <div className="h-full bg-primary" style={{ width: `${Math.min(100, pct)}%` }} />
         </div>
       </div>
+
+      {!billingEnabled ? (
+        <p className="text-sm text-muted">
+          Billing is not configured on this instance. Set the Stripe environment variables to enable upgrades.
+        </p>
+      ) : isPro ? (
+        <Button variant="secondary" onClick={() => go('/api/v1/billing/portal')} loading={busy}>
+          Manage billing
+        </Button>
+      ) : (
+        <Button onClick={() => go('/api/v1/billing/checkout')} loading={busy}>
+          Upgrade to Pro — $29/mo
+        </Button>
+      )}
     </Card>
   );
 }

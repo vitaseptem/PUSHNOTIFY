@@ -4,17 +4,24 @@ import "time"
 
 // Workspace is the multi-tenant boundary. Every resource belongs to one.
 type Workspace struct {
-	ID                 string    `json:"id"`
-	OwnerID            string    `json:"owner_id"`
-	Name               string    `json:"name"`
-	Slug               string    `json:"slug"`
-	Plan               string    `json:"plan"`
-	NotificationsSent  int64     `json:"notifications_sent"`
-	NotificationsLimit int64     `json:"notifications_limit"`
-	VAPIDPublicKey     string    `json:"vapid_public_key"`
-	VAPIDPrivateKey    string    `json:"-"`
-	CreatedAt          time.Time `json:"created_at"`
-	UpdatedAt          time.Time `json:"updated_at"`
+	ID                 string `json:"id"`
+	OwnerID            string `json:"owner_id"`
+	Name               string `json:"name"`
+	Slug               string `json:"slug"`
+	Plan               string `json:"plan"`
+	NotificationsSent  int64  `json:"notifications_sent"`
+	NotificationsLimit int64  `json:"notifications_limit"`
+	VAPIDPublicKey     string `json:"vapid_public_key"`
+	VAPIDPrivateKey    string `json:"-"`
+
+	// Billing (Stripe). Nil/empty until the workspace subscribes.
+	StripeCustomerID     *string    `json:"-"`
+	StripeSubscriptionID *string    `json:"-"`
+	PlanStatus           string     `json:"plan_status"`
+	CurrentPeriodEnd     *time.Time `json:"current_period_end,omitempty"`
+
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 // APIKey authenticates server-to-server requests for a workspace.

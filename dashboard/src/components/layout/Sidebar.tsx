@@ -41,7 +41,12 @@ export function Sidebar() {
           );
         })}
       </nav>
-      <div className="border-t border-border p-4 text-xs text-muted">Built by Astraz Studio</div>
+      <div className="space-y-2 border-t border-border p-4 text-xs text-muted">
+        <Link href="/docs" className="block hover:text-foreground">
+          📚 Developer docs
+        </Link>
+        <span className="block">Built by Astraz Studio</span>
+      </div>
     </aside>
   );
 }

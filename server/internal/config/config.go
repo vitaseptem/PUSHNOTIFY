@@ -18,11 +18,14 @@ type Config struct {
 	WhatsApp WhatsAppConfig
 	SMS      SMSConfig
 	Queue    QueueConfig
+	Billing  BillingConfig
 }
 
 type ServerConfig struct {
 	Host string
 	Port string
+	// AppURL is the public dashboard URL, used for Stripe redirect URLs.
+	AppURL string
 }
 
 type DatabaseConfig struct {
@@ -68,6 +71,19 @@ type QueueConfig struct {
 	RetryBackoffBase int // seconds
 }
 
+// BillingConfig holds Stripe configuration. When SecretKey is empty, billing
+// endpoints are disabled and the workspace stays on the free plan.
+type BillingConfig struct {
+	StripeSecretKey     string
+	StripeWebhookSecret string
+	StripePriceProID    string // recurring price id for the Pro plan
+}
+
+// Enabled reports whether Stripe billing is configured.
+func (b BillingConfig) Enabled() bool {
+	return b.StripeSecretKey != "" && b.StripePriceProID != ""
+}
+
 // Load reads configuration from environment variables and an optional
 // .env file in the working directory. Environment variables always win.
 func Load() (*Config, error) {
@@ -106,6 +122,10 @@ func Load() (*Config, error) {
 	v.SetDefault("QUEUE_WORKERS", 10)
 	v.SetDefault("MAX_RETRY_ATTEMPTS", 3)
 	v.SetDefault("RETRY_BACKOFF_BASE", 30)
+	v.SetDefault("APP_URL", "http://localhost:3000")
+	v.SetDefault("STRIPE_SECRET_KEY", "")
+	v.SetDefault("STRIPE_WEBHOOK_SECRET", "")
+	v.SetDefault("STRIPE_PRICE_PRO_ID", "")
 
 	// Reading the file is best-effort; missing file is not an error.
 	if err := v.ReadInConfig(); err != nil {
@@ -119,8 +139,9 @@ func Load() (*Config, error) {
 
 	cfg := &Config{
 		Server: ServerConfig{
-			Host: v.GetString("HOST"),
-			Port: v.GetString("PORT"),
+			Host:   v.GetString("HOST"),
+			Port:   v.GetString("PORT"),
+			AppURL: v.GetString("APP_URL"),
 		},
 		Database: DatabaseConfig{
 			URL:         v.GetString("DATABASE_URL"),
@@ -157,6 +178,11 @@ func Load() (*Config, error) {
 			Workers:          v.GetInt("QUEUE_WORKERS"),
 			MaxRetryAttempts: v.GetInt("MAX_RETRY_ATTEMPTS"),
 			RetryBackoffBase: v.GetInt("RETRY_BACKOFF_BASE"),
+		},
+		Billing: BillingConfig{
+			StripeSecretKey:     v.GetString("STRIPE_SECRET_KEY"),
+			StripeWebhookSecret: v.GetString("STRIPE_WEBHOOK_SECRET"),
+			StripePriceProID:    v.GetString("STRIPE_PRICE_PRO_ID"),
 		},
 	}
 

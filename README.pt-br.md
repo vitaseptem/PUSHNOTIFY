@@ -82,6 +82,11 @@ await client.send('user_123', {
 });
 ```
 
+## Documentação
+
+A documentação completa para devs (bilíngue EN/PT) é servida pelo dashboard em
+**`/docs`** (ex.: `http://localhost:3000/docs`).
+
 ## API (REST)
 
 Todos os endpoints ficam sob `/api/v1`. A autenticação é por JWT

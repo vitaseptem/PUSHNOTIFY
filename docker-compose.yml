@@ -53,6 +53,10 @@ services:
       TWILIO_TOKEN: ${TWILIO_TOKEN:-}
       TWILIO_FROM: ${TWILIO_FROM:-}
       QUEUE_WORKERS: "10"
+      APP_URL: ${APP_URL:-http://localhost:3000}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+      STRIPE_PRICE_PRO_ID: ${STRIPE_PRICE_PRO_ID:-}
     ports:
       - "8080:8080"
 

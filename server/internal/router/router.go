@@ -30,6 +30,10 @@ func New(h *handlers.Handlers, rdb *redis.Client, jwtSecret string, log *zap.Log
 	r.Get("/ws/{workspaceID}/{subscriberID}", h.WebSocket)
 
 	r.Route("/api/v1", func(r chi.Router) {
+		// Stripe webhook: public, authenticated by the Stripe signature on the
+		// raw body. No JWT/API key and no rate limit.
+		r.Post("/billing/webhook", h.BillingWebhook)
+
 		// Public auth routes, rate limited per IP.
 		r.Group(func(r chi.Router) {
 			r.Use(rl.ByIP(100, time.Minute))
@@ -72,6 +76,11 @@ func New(h *handlers.Handlers, rdb *redis.Client, jwtSecret string, log *zap.Log
 			r.Get("/dashboard/overview", h.DashboardOverview)
 			r.Get("/dashboard/analytics", h.DashboardAnalytics)
 			r.Get("/dashboard/live", h.DashboardLive)
+
+			// Billing (Stripe).
+			r.Get("/billing/status", h.BillingStatus)
+			r.Post("/billing/checkout", h.BillingCheckout)
+			r.Post("/billing/portal", h.BillingPortal)
 		})
 
 		// Routes that accept either an API key or a JWT (server-to-server +
